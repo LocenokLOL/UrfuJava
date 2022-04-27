@@ -3,6 +3,8 @@ package com.example.demo.events;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
+@EnableAsync
+@EnableTransactionManagement
 public class HideEvent {
     @Getter
     private final String message;
