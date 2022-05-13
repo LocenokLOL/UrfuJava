@@ -2,6 +2,8 @@ package com.example.demo.events;
 
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @EnableAsync
 @EnableTransactionManagement

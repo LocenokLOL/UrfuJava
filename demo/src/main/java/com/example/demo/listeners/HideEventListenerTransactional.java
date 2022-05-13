@@ -4,10 +4,11 @@ import com.example.demo.events.HideEvent;
 import lombok.SneakyThrows;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-
+@EnableTransactionManagement
 @Service
 public class HideEventListenerTransactional {
     @SneakyThrows
