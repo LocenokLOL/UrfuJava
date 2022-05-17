@@ -5,10 +5,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-@Component
+@Component("lion")
 public class Lion implements IAnimal{
-    public Lion (){
-    }
     @PostConstruct
     public void postConstruct(){
         System.out.println("Я родился!");

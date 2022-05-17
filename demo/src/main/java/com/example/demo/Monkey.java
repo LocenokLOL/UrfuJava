@@ -6,12 +6,10 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-@Component
+@Component("monkey")
 public class Monkey implements IAnimal {
     @Autowired
     private Movement movement;
-    public Monkey(){
-    }
     @PostConstruct
     public void postConstruct(){
         System.out.println("Я родился!");
