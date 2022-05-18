@@ -1,0 +1,323 @@
+Index: demo/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd\">\r\n    <modelVersion>4.0.0</modelVersion>\r\n    <parent>\r\n        <groupId>org.springframework.boot</groupId>\r\n        <artifactId>spring-boot-starter-parent</artifactId>\r\n        <version>2.6.5</version>\r\n        <relativePath/> <!-- lookup parent from repository -->\r\n    </parent>\r\n    <groupId>com.example</groupId>\r\n    <artifactId>demo</artifactId>\r\n    <version>0.0.1-SNAPSHOT</version>\r\n    <name>demo</name>\r\n    <description>demo</description>\r\n    <properties>\r\n        <java.version>11</java.version>\r\n    </properties>\r\n    <dependencies>\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-starter</artifactId>\r\n        </dependency>\r\n\r\n        <dependency>\r\n            <groupId>org.projectlombok</groupId>\r\n            <artifactId>lombok</artifactId>\r\n            <optional>true</optional>\r\n        </dependency>\r\n        <dependency>\r\n            <groupId>org.springframework.boot</groupId>\r\n            <artifactId>spring-boot-starter-test</artifactId>\r\n            <scope>test</scope>\r\n        </dependency>\r\n    </dependencies>\r\n\r\n    <build>\r\n        <plugins>\r\n            <plugin>\r\n                <groupId>org.springframework.boot</groupId>\r\n                <artifactId>spring-boot-maven-plugin</artifactId>\r\n                <configuration>\r\n                    <excludes>\r\n                        <exclude>\r\n                            <groupId>org.projectlombok</groupId>\r\n                            <artifactId>lombok</artifactId>\r\n                        </exclude>\r\n                    </excludes>\r\n                </configuration>\r\n            </plugin>\r\n        </plugins>\r\n    </build>\r\n\r\n</project>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/demo/pom.xml b/demo/pom.xml
+--- a/demo/pom.xml	
++++ b/demo/pom.xml	
+@@ -32,6 +32,29 @@
+             <artifactId>spring-boot-starter-test</artifactId>
+             <scope>test</scope>
+         </dependency>
++        <dependency>
++            <groupId>org.springframework.boot</groupId>
++            <artifactId>spring-boot-starter-web</artifactId>
++        </dependency>
++        <dependency>
++            <groupId>org.springframework.boot</groupId>
++            <artifactId>spring-boot-starter-data-jpa</artifactId>
++            <version>2.6.6</version>
++        </dependency>
++        <dependency>
++            <groupId>com.h2database</groupId>
++            <artifactId>h2</artifactId>
++            <scope>runtime</scope>
++        </dependency>
++        <dependency>
++        <groupId>org.springframework.boot</groupId>
++        <artifactId>spring-boot-starter-security</artifactId>
++    </dependency>
++    <dependency>
++        <groupId>org.springframework.security</groupId>
++        <artifactId>spring-security-test</artifactId>
++        <scope>test</scope>
++    </dependency>
+     </dependencies>
+ 
+     <build>
+Index: demo/src/main/java/com/example/demo/FirstHomework.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/demo/src/main/java/com/example/demo/FirstHomework.java b/demo/src/main/java/com/example/demo/FirstHomework.java
+deleted file mode 100644
+--- a/demo/src/main/java/com/example/demo/FirstHomework.java	
++++ /dev/null	
+@@ -1,10 +0,0 @@
+-package com.example.demo;
+-
+-import lombok.Getter;
+-import lombok.Setter;
+-
+-@Setter
+-@Getter
+-public class FirstHomework {
+-    private String hometask;
+-}
+Index: demo/src/main/java/com/example/demo/Controller.java
+===================================================================
+diff --git a/demo/src/main/java/com/example/demo/Controller.java b/demo/src/main/java/com/example/demo/Controller.java
+new file mode 100644
+--- /dev/null	
++++ b/demo/src/main/java/com/example/demo/Controller.java	
+@@ -0,0 +1,29 @@
++package com.example.demo;
++
++
++import org.springframework.security.core.Authentication;
++import org.springframework.web.bind.annotation.GetMapping;
++import org.springframework.web.bind.annotation.RestController;
++
++import javax.annotation.security.RolesAllowed;
++
++@RestController
++public class Controller {
++    @GetMapping("public/api")
++    public String publicApi() {
++        return "PUBLIC API ACCESS";
++    }
++
++    @RolesAllowed("ADMIN")
++    @GetMapping("admin/api")
++    public String adminApi(Authentication authentication) {
++        return "ADMIN API FOR " + authentication.getName() + " role: ADMIN";
++    }
++
++
++    @RolesAllowed("SUPPORT")
++    @GetMapping("support/api")
++    public String supportApi(Authentication authentication) {
++        return "SUPPORT API FOR" + authentication.getName() + " role: SUPPORT";
++    }
++}
+Index: demo/src/main/java/config/SecurityConfig.java
+===================================================================
+diff --git a/demo/src/main/java/config/SecurityConfig.java b/demo/src/main/java/config/SecurityConfig.java
+new file mode 100644
+--- /dev/null	
++++ b/demo/src/main/java/config/SecurityConfig.java	
+@@ -0,0 +1,47 @@
++package config;
++
++import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
++import org.springframework.context.annotation.Bean;
++import org.springframework.http.HttpMethod;
++import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
++import org.springframework.security.config.annotation.web.builders.HttpSecurity;
++import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
++import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
++import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
++import org.springframework.security.crypto.factory.PasswordEncoderFactories;
++import org.springframework.security.crypto.password.PasswordEncoder;
++
++@EnableWebSecurity
++public class SecurityConfig extends WebSecurityConfigurerAdapter {
++    private PasswordEncoder passwordEncoder;
++    @Bean
++    public PasswordEncoder encoder() {
++        return new BCryptPasswordEncoder();
++    }
++    @Override
++    protected void configure(HttpSecurity http) throws Exception {
++        http.authorizeRequests()
++                .mvcMatchers(HttpMethod.GET, "/public/api/**").permitAll() // GET requests don't need auth
++                .anyRequest()
++                .authenticated()
++                .and()
++                .httpBasic();
++    }
++
++    @Override
++    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
++        auth
++                .inMemoryAuthentication()
++                .withUser("user")
++                .password(passwordEncoder.encode("password"))
++                .roles("USER")
++                .and()
++                .withUser("admin")
++                .password(passwordEncoder.encode("admin"))
++                .roles("USER", "ADMIN")
++                .and()
++                .withUser("support")
++                .password(passwordEncoder.encode("support"))
++                .roles("USER", "SUPPORT");
++    }
++}
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"efc65e5b-0dd2-480c-b594-3c403d3b51aa\" name=\"Changes\" comment=\"YES\">\r\n      <change afterPath=\"$PROJECT_DIR$/demo/src/main/resources/application-dev.properties\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/demo/src/main/resources/application-prod.properties\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/demo/src/main/resources/application-test.properties\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/demo/src/main/resources/application.properties\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/demo/src/main/resources/application.properties\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\r\n      <map>\r\n        <entry key=\"$PROJECT_DIR$\" value=\"SecondHomework\" />\r\n      </map>\r\n    </option>\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"HighlightingSettingsPerFile\">\r\n    <setting file=\"file://$PROJECT_DIR$/demo/src/main/resources/application.properties\" root0=\"FORCE_HIGHLIGHTING\" />\r\n    <setting file=\"file://$PROJECT_DIR$/demo/src/main/java/com/example/demo/DemoApplication.java\" root0=\"FORCE_HIGHLIGHTING\" />\r\n  </component>\r\n  <component name=\"MarkdownSettingsMigration\">\r\n    <option name=\"stateVersion\" value=\"1\" />\r\n  </component>\r\n  <component name=\"MavenImportPreferences\">\r\n    <option name=\"generalSettings\">\r\n      <MavenGeneralSettings>\r\n        <option name=\"useMavenConfig\" value=\"true\" />\r\n      </MavenGeneralSettings>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"27Q3ea9PFKU6AHJtYYg1Jn00K41\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">\r\n    <property name=\"RequestMappingsPanelOrder0\" value=\"0\" />\r\n    <property name=\"RequestMappingsPanelOrder1\" value=\"1\" />\r\n    <property name=\"RequestMappingsPanelWidth0\" value=\"75\" />\r\n    <property name=\"RequestMappingsPanelWidth1\" value=\"75\" />\r\n    <property name=\"RunOnceActivity.OpenProjectViewOnStart\" value=\"true\" />\r\n    <property name=\"RunOnceActivity.ShowReadmeOnStart\" value=\"true\" />\r\n    <property name=\"WebServerToolWindowFactoryState\" value=\"false\" />\r\n    <property name=\"settings.editor.selected.configurable\" value=\"reference.settings.project.maven.repository.indices\" />\r\n    <property name=\"show.run.dashboard.notification\" value=\"false\" />\r\n  </component>\r\n  <component name=\"RunManager\" selected=\"Spring Boot.DemoApplication\">\r\n    <configuration name=\"DemoApplication (1)\" type=\"SpringBootApplicationConfigurationType\" factoryName=\"Spring Boot\">\r\n      <module name=\"demo\" />\r\n      <option name=\"SPRING_BOOT_MAIN_CLASS\" value=\"com.example.demo.DemoApplication\" />\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n    <configuration name=\"DemoApplication\" type=\"SpringBootApplicationConfigurationType\" factoryName=\"Spring Boot\">\r\n      <module name=\"demo\" />\r\n      <option name=\"SPRING_BOOT_MAIN_CLASS\" value=\"com.example.demo.DemoApplication\" />\r\n      <option name=\"ALTERNATIVE_JRE_PATH_ENABLED\" value=\"true\" />\r\n      <option name=\"ALTERNATIVE_JRE_PATH\" value=\"$USER_HOME$/.jdks/corretto-11.0.14.1\" />\r\n      <method v=\"2\">\r\n        <option name=\"Make\" enabled=\"true\" />\r\n      </method>\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"efc65e5b-0dd2-480c-b594-3c403d3b51aa\" name=\"Changes\" comment=\"\" />\r\n      <created>1649238579000</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1649238579000</updated>\r\n      <workItem from=\"1649238580259\" duration=\"2858000\" />\r\n      <workItem from=\"1649595581412\" duration=\"1374000\" />\r\n      <workItem from=\"1649609830271\" duration=\"53000\" />\r\n      <workItem from=\"1649670356542\" duration=\"2420000\" />\r\n      <workItem from=\"1649673574714\" duration=\"2517000\" />\r\n      <workItem from=\"1649676154612\" duration=\"78000\" />\r\n      <workItem from=\"1649676249142\" duration=\"28000\" />\r\n      <workItem from=\"1649676290645\" duration=\"334000\" />\r\n      <workItem from=\"1649676640753\" duration=\"8687000\" />\r\n      <workItem from=\"1649764190930\" duration=\"1912000\" />\r\n      <workItem from=\"1649788895942\" duration=\"3336000\" />\r\n      <workItem from=\"1650360818461\" duration=\"1438000\" />\r\n      <workItem from=\"1650362320303\" duration=\"2923000\" />\r\n      <workItem from=\"1650541243918\" duration=\"3000\" />\r\n      <workItem from=\"1650790588673\" duration=\"6000\" />\r\n      <workItem from=\"1651051188392\" duration=\"4469000\" />\r\n      <workItem from=\"1651059629433\" duration=\"891000\" />\r\n      <workItem from=\"1652437333118\" duration=\"4024000\" />\r\n      <workItem from=\"1652703627907\" duration=\"5000\" />\r\n      <workItem from=\"1652743971637\" duration=\"923000\" />\r\n      <workItem from=\"1652745965515\" duration=\"77000\" />\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"YES\">\r\n      <created>1649239051578</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1649239051578</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00002\" summary=\"YES\">\r\n      <created>1649685960074</created>\r\n      <option name=\"number\" value=\"00002\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1649685960074</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00003\" summary=\"YES\">\r\n      <created>1652437457920</created>\r\n      <option name=\"number\" value=\"00003\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1652437457920</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00004\" summary=\"YES\">\r\n      <created>1652437496253</created>\r\n      <option name=\"number\" value=\"00004\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1652437496253</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00005\" summary=\"YES\">\r\n      <created>1652450910910</created>\r\n      <option name=\"number\" value=\"00005\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1652450910910</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"6\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"3\" />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State>\r\n              <option name=\"FILTERS\">\r\n                <map>\r\n                  <entry key=\"branch\">\r\n                    <value>\r\n                      <list>\r\n                        <option value=\"main\" />\r\n                      </list>\r\n                    </value>\r\n                  </entry>\r\n                </map>\r\n              </option>\r\n            </State>\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"YES\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"YES\" />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	
++++ b/.idea/workspace.xml	
+@@ -4,11 +4,14 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="efc65e5b-0dd2-480c-b594-3c403d3b51aa" name="Changes" comment="YES">
+-      <change afterPath="$PROJECT_DIR$/demo/src/main/resources/application-dev.properties" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/demo/src/main/resources/application-prod.properties" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/demo/src/main/resources/application-test.properties" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/demo/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/demo/src/main/resources/application.properties" afterDir="false" />
++    <list default="true" id="efc65e5b-0dd2-480c-b594-3c403d3b51aa" name="Changes" comment="es">
++      <change afterPath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/Controller.java" afterDir="false" />
++      <change afterPath="$PROJECT_DIR$/demo/src/main/java/config/SecurityConfig.java" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_13_05_2022_19_07__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_13_05_2022_19_07__Changes_.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/demo/demo.iml" beforeDir="false" afterPath="$PROJECT_DIR$/demo/demo.iml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/demo/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/demo/pom.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/demo/src/main/java/com/example/demo/FirstHomework.java" beforeDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -25,7 +28,7 @@
+   <component name="Git.Settings">
+     <option name="RECENT_BRANCH_BY_REPOSITORY">
+       <map>
+-        <entry key="$PROJECT_DIR$" value="SecondHomework" />
++        <entry key="$PROJECT_DIR$" value="FifthHomework" />
+       </map>
+     </option>
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+@@ -45,6 +48,7 @@
+     </option>
+   </component>
+   <component name="ProjectId" id="27Q3ea9PFKU6AHJtYYg1Jn00K41" />
++  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+   <component name="ProjectViewState">
+     <option name="hideEmptyMiddlePackages" value="true" />
+     <option name="showLibraryContents" value="true" />
+@@ -107,6 +111,7 @@
+       <workItem from="1652703627907" duration="5000" />
+       <workItem from="1652743971637" duration="923000" />
+       <workItem from="1652745965515" duration="77000" />
++      <workItem from="1652896628151" duration="63000" />
+     </task>
+     <task id="LOCAL-00001" summary="YES">
+       <created>1649239051578</created>
+Index: demo/demo.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule=\"true\" type=\"JAVA_MODULE\" version=\"4\">\r\n  <component name=\"FacetManager\">\r\n    <facet type=\"Spring\" name=\"Spring\">\r\n      <configuration />\r\n    </facet>\r\n  </component>\r\n  <component name=\"NewModuleRootManager\" LANGUAGE_LEVEL=\"JDK_11\">\r\n    <output url=\"file://$MODULE_DIR$/target/classes\" />\r\n    <output-test url=\"file://$MODULE_DIR$/target/test-classes\" />\r\n    <content url=\"file://$MODULE_DIR$\">\r\n      <sourceFolder url=\"file://$MODULE_DIR$/src/main/java\" isTestSource=\"false\" />\r\n      <sourceFolder url=\"file://$MODULE_DIR$/src/main/resources\" type=\"java-resource\" />\r\n      <sourceFolder url=\"file://$MODULE_DIR$/src/test/java\" isTestSource=\"true\" />\r\n      <excludeFolder url=\"file://$MODULE_DIR$/target\" />\r\n    </content>\r\n    <orderEntry type=\"inheritedJdk\" />\r\n    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.springframework.boot:spring-boot-starter:2.6.5\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.springframework.boot:spring-boot:2.6.5\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.springframework:spring-context:5.3.17\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.springframework:spring-aop:5.3.17\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.springframework:spring-beans:5.3.17\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.springframework:spring-expression:5.3.17\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.springframework.boot:spring-boot-autoconfigure:2.6.5\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.springframework.boot:spring-boot-starter-logging:2.6.5\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: ch.qos.logback:logback-classic:1.2.11\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: ch.qos.logback:logback-core:1.2.11\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.apache.logging.log4j:log4j-to-slf4j:2.17.2\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.apache.logging.log4j:log4j-api:2.17.2\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.slf4j:jul-to-slf4j:1.7.36\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: jakarta.annotation:jakarta.annotation-api:1.3.5\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.springframework:spring-core:5.3.17\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.springframework:spring-jcl:5.3.17\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.yaml:snakeyaml:1.29\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.projectlombok:lombok:1.18.22\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.springframework.boot:spring-boot-starter-test:2.6.5\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.springframework.boot:spring-boot-test:2.6.5\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.springframework.boot:spring-boot-test-autoconfigure:2.6.5\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: com.jayway.jsonpath:json-path:2.6.0\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: net.minidev:json-smart:2.4.8\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: net.minidev:accessors-smart:2.4.8\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.ow2.asm:asm:9.1\" level=\"project\" />\r\n    <orderEntry type=\"library\" name=\"Maven: org.slf4j:slf4j-api:1.7.36\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: jakarta.xml.bind:jakarta.xml.bind-api:2.3.3\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: jakarta.activation:jakarta.activation-api:1.2.2\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.assertj:assertj-core:3.21.0\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.hamcrest:hamcrest:2.2\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.junit.jupiter:junit-jupiter:5.8.2\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.junit.jupiter:junit-jupiter-api:5.8.2\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.opentest4j:opentest4j:1.2.0\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.junit.platform:junit-platform-commons:1.8.2\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.apiguardian:apiguardian-api:1.1.2\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.junit.jupiter:junit-jupiter-params:5.8.2\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.junit.jupiter:junit-jupiter-engine:5.8.2\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.junit.platform:junit-platform-engine:1.8.2\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.mockito:mockito-core:4.0.0\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: net.bytebuddy:byte-buddy:1.11.22\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: net.bytebuddy:byte-buddy-agent:1.11.22\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.objenesis:objenesis:3.2\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.mockito:mockito-junit-jupiter:4.0.0\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.skyscreamer:jsonassert:1.5.0\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: com.vaadin.external.google:android-json:0.0.20131108.vaadin1\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.springframework:spring-test:5.3.17\" level=\"project\" />\r\n    <orderEntry type=\"library\" scope=\"TEST\" name=\"Maven: org.xmlunit:xmlunit-core:2.8.4\" level=\"project\" />\r\n  </component>\r\n</module>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/demo/demo.iml b/demo/demo.iml
+--- a/demo/demo.iml	
++++ b/demo/demo.iml	
+@@ -1,6 +1,23 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+   <component name="FacetManager">
++    <facet type="web" name="Web">
++      <configuration>
++        <webroots />
++        <sourceRoots>
++          <root url="file://$MODULE_DIR$/src/main/java" />
++          <root url="file://$MODULE_DIR$/src/main/resources" />
++        </sourceRoots>
++      </configuration>
++    </facet>
++    <facet type="jpa" name="JPA">
++      <configuration>
++        <setting name="validation-enabled" value="true" />
++        <setting name="provider-name" value="Hibernate" />
++        <datasource-mapping />
++        <naming-strategy-map />
++      </configuration>
++    </facet>
+     <facet type="Spring" name="Spring">
+       <configuration />
+     </facet>
+@@ -19,9 +36,6 @@
+     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter:2.6.5" level="project" />
+     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:2.6.5" level="project" />
+     <orderEntry type="library" name="Maven: org.springframework:spring-context:5.3.17" level="project" />
+-    <orderEntry type="library" name="Maven: org.springframework:spring-aop:5.3.17" level="project" />
+-    <orderEntry type="library" name="Maven: org.springframework:spring-beans:5.3.17" level="project" />
+-    <orderEntry type="library" name="Maven: org.springframework:spring-expression:5.3.17" level="project" />
+     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-autoconfigure:2.6.5" level="project" />
+     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-logging:2.6.5" level="project" />
+     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.2.11" level="project" />
+@@ -42,8 +56,8 @@
+     <orderEntry type="library" scope="TEST" name="Maven: net.minidev:accessors-smart:2.4.8" level="project" />
+     <orderEntry type="library" scope="TEST" name="Maven: org.ow2.asm:asm:9.1" level="project" />
+     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.36" level="project" />
+-    <orderEntry type="library" scope="TEST" name="Maven: jakarta.xml.bind:jakarta.xml.bind-api:2.3.3" level="project" />
+-    <orderEntry type="library" scope="TEST" name="Maven: jakarta.activation:jakarta.activation-api:1.2.2" level="project" />
++    <orderEntry type="library" name="Maven: jakarta.xml.bind:jakarta.xml.bind-api:2.3.3" level="project" />
++    <orderEntry type="library" name="Maven: jakarta.activation:jakarta.activation-api:1.2.2" level="project" />
+     <orderEntry type="library" scope="TEST" name="Maven: org.assertj:assertj-core:3.21.0" level="project" />
+     <orderEntry type="library" scope="TEST" name="Maven: org.hamcrest:hamcrest:2.2" level="project" />
+     <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter:5.8.2" level="project" />
+@@ -55,7 +69,7 @@
+     <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-engine:5.8.2" level="project" />
+     <orderEntry type="library" scope="TEST" name="Maven: org.junit.platform:junit-platform-engine:1.8.2" level="project" />
+     <orderEntry type="library" scope="TEST" name="Maven: org.mockito:mockito-core:4.0.0" level="project" />
+-    <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy:1.11.22" level="project" />
++    <orderEntry type="library" name="Maven: net.bytebuddy:byte-buddy:1.11.22" level="project" />
+     <orderEntry type="library" scope="TEST" name="Maven: net.bytebuddy:byte-buddy-agent:1.11.22" level="project" />
+     <orderEntry type="library" scope="TEST" name="Maven: org.objenesis:objenesis:3.2" level="project" />
+     <orderEntry type="library" scope="TEST" name="Maven: org.mockito:mockito-junit-jupiter:4.0.0" level="project" />
+@@ -63,5 +77,52 @@
+     <orderEntry type="library" scope="TEST" name="Maven: com.vaadin.external.google:android-json:0.0.20131108.vaadin1" level="project" />
+     <orderEntry type="library" scope="TEST" name="Maven: org.springframework:spring-test:5.3.17" level="project" />
+     <orderEntry type="library" scope="TEST" name="Maven: org.xmlunit:xmlunit-core:2.8.4" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-web:2.6.5" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-json:2.6.5" level="project" />
++    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.13.2" level="project" />
++    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.13.2" level="project" />
++    <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.13.2" level="project" />
++    <orderEntry type="library" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.2" level="project" />
++    <orderEntry type="library" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.2" level="project" />
++    <orderEntry type="library" name="Maven: com.fasterxml.jackson.module:jackson-module-parameter-names:2.13.2" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-tomcat:2.6.5" level="project" />
++    <orderEntry type="library" name="Maven: org.apache.tomcat.embed:tomcat-embed-core:9.0.60" level="project" />
++    <orderEntry type="library" name="Maven: org.apache.tomcat.embed:tomcat-embed-el:9.0.60" level="project" />
++    <orderEntry type="library" name="Maven: org.apache.tomcat.embed:tomcat-embed-websocket:9.0.60" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework:spring-web:5.3.17" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework:spring-beans:5.3.17" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework:spring-webmvc:5.3.17" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework:spring-expression:5.3.17" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-data-jpa:2.6.6" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-aop:2.6.5" level="project" />
++    <orderEntry type="library" name="Maven: org.aspectj:aspectjweaver:1.9.7" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-jdbc:2.6.5" level="project" />
++    <orderEntry type="library" name="Maven: com.zaxxer:HikariCP:4.0.3" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework:spring-jdbc:5.3.17" level="project" />
++    <orderEntry type="library" name="Maven: jakarta.transaction:jakarta.transaction-api:1.3.3" level="project" />
++    <orderEntry type="library" name="Maven: jakarta.persistence:jakarta.persistence-api:2.2.3" level="project" />
++    <orderEntry type="library" name="Maven: org.hibernate:hibernate-core:5.6.7.Final" level="project" />
++    <orderEntry type="library" name="Maven: org.jboss.logging:jboss-logging:3.4.3.Final" level="project" />
++    <orderEntry type="library" name="Maven: antlr:antlr:2.7.7" level="project" />
++    <orderEntry type="library" name="Maven: org.jboss:jandex:2.4.2.Final" level="project" />
++    <orderEntry type="library" name="Maven: com.fasterxml:classmate:1.5.1" level="project" />
++    <orderEntry type="library" name="Maven: org.hibernate.common:hibernate-commons-annotations:5.1.2.Final" level="project" />
++    <orderEntry type="library" name="Maven: org.glassfish.jaxb:jaxb-runtime:2.3.6" level="project" />
++    <orderEntry type="library" name="Maven: org.glassfish.jaxb:txw2:2.3.6" level="project" />
++    <orderEntry type="library" name="Maven: com.sun.istack:istack-commons-runtime:3.0.12" level="project" />
++    <orderEntry type="library" scope="RUNTIME" name="Maven: com.sun.activation:jakarta.activation:1.2.2" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.data:spring-data-jpa:2.6.3" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.data:spring-data-commons:2.6.3" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework:spring-orm:5.3.17" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework:spring-tx:5.3.17" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework:spring-aspects:5.3.17" level="project" />
++    <orderEntry type="library" scope="RUNTIME" name="Maven: com.h2database:h2:1.4.200" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-security:2.6.5" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework:spring-aop:5.3.17" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-config:5.6.2" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-web:5.6.2" level="project" />
++    <orderEntry type="library" scope="TEST" name="Maven: org.springframework.security:spring-security-test:5.6.2" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-core:5.6.2" level="project" />
++    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-crypto:5.6.2" level="project" />
+   </component>
+ </module>
+\ No newline at end of file
